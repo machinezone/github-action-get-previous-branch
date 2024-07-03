@@ -21,7 +21,7 @@ exec(`git for-each-ref --sort=-v:refname --format="%(refname:short)" "refs/remot
 
     var branchList = branches.split('\n')
     branchList.forEach((branch, index) => branchList[index] = branch.slice('origin/'.length));
-    if (!process.env.INPUT_LIMIT) {
+    if (!process.env.INPUT_GET_NEXT || (process.env.INPUT_GET_NEXT && !process.env.INPUT_CURRENT_BRANCH)) {
         console.log('\x1b[32m%s\x1b[0m', `Found branch: ${branchList[0]}`);
         console.log('\x1b[32m%s\x1b[0m', `Found version: ${branchList[0].slice(process.env.INPUT_PREFIX.length)}`);
         fs.appendFileSync(process.env.GITHUB_OUTPUT, `branch=${branchList[0]}\n`);
@@ -29,12 +29,12 @@ exec(`git for-each-ref --sort=-v:refname --format="%(refname:short)" "refs/remot
         process.exit(0);
     }
 
-    var limitVersion = process.env.INPUT_LIMIT.slice(process.env.INPUT_PREFIX.length)
+    var currentVersion = process.env.INPUT_CURRENT_BRANCH.slice(process.env.INPUT_PREFIX.length)
 
-    // Loop through branch list and return highest branch below the limit branch
-    for (var i = 0; i < branchList.length; i++) {
+    // Loop (from the end to beginning) through branch list and return the next highest branch after the provided current
+    for (var i = branchList.length-1; i >= 0; i--) {
         var branchVersion = branchList[i].slice(process.env.INPUT_PREFIX.length)
-        if (limitVersion.localeCompare(branchVersion, undefined, { numeric: true, sensitivity: 'base' }) == 1) {
+        if (currentVersion.localeCompare(branchVersion, undefined, { numeric: true, sensitivity: 'base' }) == -1) {
             console.log('\x1b[32m%s\x1b[0m', `Found branch: ${branchList[i]}`);
             console.log('\x1b[32m%s\x1b[0m', `Found version: ${branchVersion}`);
             fs.appendFileSync(process.env.GITHUB_OUTPUT, `branch=${branchList[i]}\n`);
@@ -43,10 +43,10 @@ exec(`git for-each-ref --sort=-v:refname --format="%(refname:short)" "refs/remot
         }
     }
 
-    // In the event in which branches were found but no branches were below the requested limit, we return empty strings
+    // In the event in which branches were found but no branches were higher than the next requested branch, we return empty strings
     console.log('\x1b[32m%s\x1b[0m', `Returning empty branch`);
     console.log('\x1b[32m%s\x1b[0m', `Returning empty version`);
-    fs.appendFileSync(process.env.GITHUB_OUTPUT, `branch=""\n`);
-    fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=""\n`);
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `branch=\n`);
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=\n`);
     process.exit(0);
 });

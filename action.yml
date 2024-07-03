@@ -7,8 +7,13 @@ inputs:
   fallback:
     description: 'Fallback branch to use when no previous branch can be found'
     required: false
-  limit:
-    description: 'Optional (non-inclusive) upper limit version branch. Will only return branches lower in version than this or none'
+  get_next:
+    description: 'Return not the highest version but the next highest version. Works in conjunction with the "current_branch" parameter'
+    type: boolean
+    default: false
+    required: false
+  current_branch:
+    description: 'Optional parameter for use with "get_next". Specifies the current branch to fetch the next highest version branch if it exists.'
     required: false
   prefix:
     description: 'Prefix to query the branch by'
