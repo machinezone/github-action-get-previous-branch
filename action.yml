@@ -7,6 +7,9 @@ inputs:
   fallback:
     description: 'Fallback branch to use when no previous branch can be found'
     required: false
+  limit:
+    description: 'Optional (non-inclusive) upper limit version branch. Will only return branches lower in version than this or none'
+    required: false
   prefix:
     description: 'Prefix to query the branch by'
     required: false
